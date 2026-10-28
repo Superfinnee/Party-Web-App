@@ -1,0 +1,72 @@
+/* Dietary requirement checkboxes, shown as tappable chips */
+.field-hint {
+    margin: 0.25rem 0 0.75rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.check-group {
+    border: none;
+    margin: 0 0 1rem;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.check-group legend {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    padding: 0;
+}
+
+.check-chip {
+    cursor: pointer;
+}
+
+/* Hide the native box but keep it focusable for keyboard and screen readers */
+.check-chip input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.check-chip span {
+    display: inline-block;
+    padding: 0.4rem 0.9rem;
+    border: 1.5px solid #ccc;
+    border-radius: 999px;
+    background: #fff;
+    user-select: none;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.check-chip:hover span {
+    border-color: #888;
+}
+
+.check-chip input:checked + span {
+    background: #6c3ce0;
+    border-color: #6c3ce0;
+    color: #fff;
+}
+
+.check-chip input:checked + span::before {
+    content: "✓ ";
+}
+
+.check-chip input:focus-visible + span {
+    outline: 2px solid #6c3ce0;
+    outline-offset: 2px;
+}
+
+/* Severe allergies, highlighted so they stand out */
+.check-chip.important span {
+    font-weight: 600;
+}
+
+.check-chip.important input:checked + span {
+    background: #d6336c;
+    border-color: #d6336c;
+}

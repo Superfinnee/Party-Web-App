@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width", initial-scale=1>
+    <title>Piccoli Party</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body>
+
+    <div class="wrapper">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+            <!--{# The category ('error' or 'success') is used directly as a CSS class name,
+                mapping to .error (red) and .success (green) styles in style.css #}-->
+            <p class="{{ category }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    {% block buttons %}
+    <nav class="nav-bar">
+
+    </nav>
+
+    {% endblock %}
+
+    {% block body %}
+    {% endblock %}
+
+    <script src="{{ url_for('static', filename="party.js")}}"></script>
+    <br><br><br>
+
+</body>
+</html>

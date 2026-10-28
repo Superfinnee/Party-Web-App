@@ -1,0 +1,84 @@
+{% entends "layout.html" %}
+
+{% block buttons %}{% endblock %}
+
+{% block body %}
+
+<div class="auth-page">
+    <form method="POST" action="/register">
+    <h2 class="auth-title">Get ready to party!</h2>
+    
+        <div class="auth-card">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="auth-field">
+                <label for="fName">First Name</label>
+                <input type="text" id="fName" name="fName" required>
+            </div>
+    
+            <div class="auth-field">
+                <label for="lName">Last Name</label>
+                <input type="text" id="lName" name="lName" required>
+            </div>
+
+            <div class="auth-field">
+                <label>Will you be attending the party?</label>
+                <input type="radio" id="yes" name="attending" value="Yes" checked>
+                <label for="attending">Yes</label>
+                <input type="radio" id="no" name="attending" value="No">
+                <label for="attending">No</label>
+            </div>
+
+            <div class="auth-field">
+                <label>Dietary requirements</label>
+                <p class="field-hint">Tap any that apply. Do not put dislikes here.</p>
+
+                <fieldset class="check-group">
+                    <legend>Major Food Allergies</legend>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Peanuts"><span>Peanuts</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Tree Nuts"><span>Tree Nuts</span></label>
+                    <label class="check-chip important"><input type="checkbox" name="dietaries" value="All Nuts"><span>All Nuts</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Shellfish"><span>Shellfish</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Fish"><span>Fish</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Eggs"><span>Eggs</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Soy"><span>Soy</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Sesame"><span>Sesame</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Sulphites"><span>Sulphites</span></label>
+                </fieldset>
+
+                <fieldset class="check-group">
+                    <legend>Lifestyle</legend>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Vegetarian"><span>Vegetarian</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Vegan"><span>Vegan</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Pescetarian"><span>Pescetarian</span></label>
+                </fieldset>
+
+                <fieldset class="check-group">
+                    <legend>Religious</legend>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Halal"><span>Halal</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Kosher"><span>Kosher</span></label>
+                </fieldset>
+
+                <fieldset class="check-group">
+                    <legend>Medical and Intolerances</legend>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Gluten-Free"><span>Gluten-Free</span></label>
+                    <label class="check-chip important"><input type="checkbox" name="dietaries" value="Coeliac"><span>Coeliac</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Dairy Free"><span>Dairy Free</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Lactose Intolerant"><span>Lactose Intolerant</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Low Sodium"><span>Low Sodium</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Heart Healthy"><span>Heart Healthy</span></label>
+                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Diabetic Friendly"><span>Diabetic Friendly</span></label>
+                </fieldset>
+            </div>
+            
+            <div class="auth-field">
+                <label for="interest">Interest</label>
+                <p>Type one of your interests here. This can be a hobby, holiday, anything you could talk about.</p>
+                <input type="text" id="interest" name="interest">
+            </div>
+
+        </div>
+
+
+
+        {% for i in range(len(groupSize) - 1) %}
