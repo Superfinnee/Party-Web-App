@@ -1,1 +1,26 @@
 {% entends "layout.html" %}
+
+{% block body %}
+
+<h1>Manage Guests</h1>
+
+<form name="addGroup" method="POST" action={{ url_for('host') }}>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+
+    <div>
+        <label for="familyName">Family Name</label>
+        <input type="text" id="familyName" name="familyName">
+    </div>
+
+    <div>
+        <label for="groupSize">Group Size</label>
+        <input type="number" id="groupSize" name="groupSize">
+    </div>
+</form>
+
+{% endblock %}

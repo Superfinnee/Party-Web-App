@@ -61,9 +61,15 @@ def register():
 @app.route("/host")
 def host():
     if request.method == "POST":
+        
+        email = escape(request.form['email'])
+        familyName = escape(request.form['familyName'])
         return render_template("host.html")
     
     return render_template("host.html")
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
