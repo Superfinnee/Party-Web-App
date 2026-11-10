@@ -1,0 +1,14 @@
+You're invited to the {{ partyName }}!
+
+Dear {{ familyName }},
+
+We'd love for you to celebrate with us! Your invitation is for {{ groupSize }} {{ 'guest' if groupSize == 1 else 'guests' }}.
+
+Please register everyone in your group so we can plan food, drinks and everything else. Whoever registers first becomes the group leader and creates your group's password.
+
+Your signup code: {{ code }}
+
+Register here: {{ registerURL }}
+
+This code is just for your group, so please don't share it.
+We can't wait to see you there!

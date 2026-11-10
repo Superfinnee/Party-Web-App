@@ -1,31 +1,37 @@
-{% entends "layout.html" %}
+{% extends "layout.html" %}
 
-{% block buttons %}{%endblock%}
+{% block buttons %}{% endblock %}
 
 {% block body %}
 
 <div class="auth-page">
-    <form class="auth-card" method="POST" action="{{ url_for('login') }}">
+    <form class="auth-card" method="POST" action="{{ url_for('home') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <h2 class="auth-title">Login</h2>
- 
+        <p class="eyebrow">{{ config.PARTY_NAME }}</p>
+        <h2 class="auth-title">Welcome back</h2>
+        <p class="field-hint">Log in with the email your invitation was sent to.</p>
+
         <div class="auth-field">
-            <label for="usernameOrEmail">Username or Email</label>
-            <input type="text" id="usernameOrEmail" name="usernameOrEmail" required>
+            <label for="email">Email</label>
+            {# type="text" rather than "email" so Apple text replacements (e.g. "f@") work here.
+               The server still checks the address. #}
+            <input type="text" id="email" name="email" value="{{ request.form.get('email', '') }}"
+                   autocomplete="email" autocapitalize="none" spellcheck="false" inputmode="email" required autofocus>
         </div>
- 
+
         <div class="auth-field">
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
+            <input type="password" id="password" name="password" autocomplete="current-password" required>
             <label class="show-password">
-                <input type="checkbox" onclick="togglePassword()"> Show password
+                <input type="checkbox" onclick="togglePassword('password')"> Show password
             </label>
         </div>
- 
-        <button type="submit" class="auth-submit">Login</button>
- 
-        <p class="auth-switch">Don't have an account? <a href="{{ url_for('register') }}">Register here</a>.</p>
+
+        <button type="submit" class="auth-submit">Log in</button>
+
+        <p class="auth-switch">Got an invitation but haven't registered yet?
+            <a href="{{ url_for('register') }}">Register with your signup code</a>.</p>
     </form>
 </div>
- 
+
 {% endblock %}

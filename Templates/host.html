@@ -1,26 +1,201 @@
-{% entends "layout.html" %}
+{% extends "layout.html" %}
+
+{% block title %}Manage Guests · {{ config.PARTY_NAME }}{% endblock %}
 
 {% block body %}
 
-<h1>Manage Guests</h1>
+<div class="host-page">
 
-<form name="addGroup" method="POST" action={{ url_for('host') }}>
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-    <div>
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required>
+    <div class="page-header">
+        <h1>Manage Guests</h1>
+        <form method="POST" action="{{ url_for('logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="link-button">Log out</button>
+        </form>
     </div>
 
-    <div>
-        <label for="familyName">Family Name</label>
-        <input type="text" id="familyName" name="familyName">
-    </div>
+    <nav class="section-nav">
+        <a href="#updates">Updates ({{ messages|length }})</a>
+        <a href="#songs">Song requests ({{ pendingSongs|length }})</a>
+        <a href="#invite">Invite a group</a>
+        <a href="#groups">Groups ({{ groups|length }})</a>
+    </nav>
 
-    <div>
-        <label for="groupSize">Group Size</label>
-        <input type="number" id="groupSize" name="groupSize">
-    </div>
-</form>
+    {# ------------------------------------------------ Updates for guests #}
+    <section id="updates" class="host-section">
+        <h2>Updates</h2>
+        <div class="host-columns">
+            <form class="auth-card" method="POST" action="{{ url_for('postMessage') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <h3>Post an update</h3>
+                <p class="field-hint">Every logged-in guest will see this on their page.</p>
+
+                <div class="auth-field">
+                    <label for="title">Title <span class="optional">(optional)</span></label>
+                    <input type="text" id="title" name="title" maxlength="120" placeholder="e.g. Parking">
+                </div>
+
+                <div class="auth-field">
+                    <label for="body">Message</label>
+                    <textarea id="body" name="body" rows="4" maxlength="2000" required></textarea>
+                </div>
+
+                <button type="submit" class="auth-submit">Post update</button>
+            </form>
+
+            <div class="auth-card">
+                <h3>Posted</h3>
+                {% for message in messages %}
+                <article class="message">
+                    {% if message.title %}<h4>{{ message.title }}</h4>{% endif %}
+                    <p class="message-body">{{ message.body }}</p>
+                    <div class="message-footer">
+                        <span class="message-time">{{ message.createdAt|friendlyTime }}</span>
+                        <form method="POST" action="{{ url_for('deleteMessage', messageID=message.id) }}"
+                              onsubmit="return confirm('Delete this update? Guests will no longer see it.')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="link-button danger">Delete</button>
+                        </form>
+                    </div>
+                </article>
+                {% else %}
+                <p class="field-hint">Nothing posted yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    {# ------------------------------------------------ Song requests #}
+    <section id="songs" class="host-section">
+        <h2>Song requests</h2>
+        <p class="field-hint">Once a song is on your playlist, press <strong>Added</strong> to clear it from this list.</p>
+
+        {% if pendingSongs %}
+        <div class="table-scroll">
+            <table class="group-table">
+                <thead>
+                    <tr><th>Song</th><th>Artist</th><th>Requested by</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for song in pendingSongs %}
+                    <tr>
+                        <td><strong>{{ song.title }}</strong></td>
+                        <td>{{ song.artist or '—' }}</td>
+                        <td>{{ song.fName }} {{ song.lName }} <span class="muted">({{ song.familyName }})</span></td>
+                        <td>
+                            <form method="POST" action="{{ url_for('markSongAdded', songID=song.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="small-button">Added ✓</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="field-hint">You're all caught up. No new song requests.</p>
+        {% endif %}
+
+        {% if addedSongs %}
+        <details class="added-songs">
+            <summary>Already added ({{ addedSongs|length }})</summary>
+            <ul class="song-list">
+                {% for song in addedSongs %}
+                <li>
+                    <span><strong>{{ song.title }}</strong>{% if song.artist %} · {{ song.artist }}{% endif %}
+                        <span class="muted">from {{ song.fName }}</span></span>
+                    <form method="POST" action="{{ url_for('unmarkSongAdded', songID=song.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="link-button">Undo</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
+        {% endif %}
+    </section>
+
+    {# ------------------------------------------------ Invite a group #}
+    <section id="invite" class="host-section">
+        <form class="auth-card host-form" name="addGroup" method="POST" action="{{ url_for('host') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <h2 class="auth-title">Invite a group</h2>
+            <p class="field-hint">They'll be emailed a signup code and a link to register everyone in their group.</p>
+
+            <div class="auth-field">
+                <label for="familyName">Family / group name</label>
+                <input type="text" id="familyName" name="familyName" placeholder="e.g. Smith" required>
+            </div>
+
+            <div class="auth-field">
+                <label for="email">Email</label>
+                {# type="text" rather than "email" so Apple text replacements work here.
+                   The server still checks the address is valid. #}
+                <input type="text" id="email" name="email" autocomplete="off"
+                       autocapitalize="none" spellcheck="false" required>
+            </div>
+
+            <div class="auth-field">
+                <label for="groupSize">Group size</label>
+                <input type="number" id="groupSize" name="groupSize" min="1" max="{{ maxGroupSize }}" value="1" required>
+            </div>
+
+            <button type="submit" class="auth-submit">Add group and send invite</button>
+        </form>
+    </section>
+
+    {# ------------------------------------------------ Groups #}
+    <section id="groups" class="host-section">
+        <h2>Groups ({{ groups|length }})</h2>
+
+        {% if groups %}
+        <div class="table-scroll">
+            <table class="group-table">
+                <thead>
+                    <tr>
+                        <th>Group</th>
+                        <th>Email</th>
+                        <th>Size</th>
+                        <th>Code</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for group in groups %}
+                    <tr>
+                        <td>{{ group.familyName }}</td>
+                        <td>{{ group.email }}</td>
+                        <td>{{ group.groupSize }}</td>
+                        <td class="code">{{ group.code }}</td>
+                        <td>
+                            {% if group.registeredAt %}
+                            <span class="status status-registered">Registered · {{ group.attendingCount }} attending</span>
+                            {% elif group.invitedAt %}
+                            <span class="status status-invited">Invited</span>
+                            {% else %}
+                            <span class="status status-failed">Email not sent</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if not group.registeredAt %}
+                            <form method="POST" action="{{ url_for('resendInvite', groupID=group.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="link-button">Resend</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="field-hint">No groups yet. Add your first one above.</p>
+        {% endif %}
+    </section>
+
+</div>
 
 {% endblock %}

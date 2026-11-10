@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>You're invited to the {{ partyName }}</title>
+</head>
+{#
+  Email clients ignore <style> blocks and modern CSS, so everything here is
+  table-based with inline styles. Keep it that way when editing.
+#}
+<body style="margin:0; padding:0; background-color:#f3effc;">
+
+    <!-- Preview text shown in the inbox list -->
+    <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+        Your signup code is {{ code }}. Register your group of {{ groupSize }} and get ready to party!
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f3effc;">
+        <tr>
+            <td align="center" style="padding:32px 16px;">
+
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                       style="max-width:560px; background-color:#ffffff; border-radius:16px; overflow:hidden;
+                              box-shadow:0 4px 24px rgba(108,60,224,0.12);">
+
+                    <!-- Header -->
+                    <tr>
+                        <td align="center"
+                            style="background-color:#6c3ce0; background-image:linear-gradient(135deg,#6c3ce0 0%,#d6336c 100%);
+                                   padding:44px 32px 40px;">
+                            <div style="font-size:40px; line-height:1;">🎉</div>
+                            <p style="margin:16px 0 6px; font-family:Helvetica,Arial,sans-serif; font-size:13px;
+                                      letter-spacing:3px; text-transform:uppercase; color:#e9e0ff;">
+                                You're invited
+                            </p>
+                            <h1 style="margin:0; font-family:Georgia,'Times New Roman',serif; font-size:34px;
+                                       line-height:1.2; font-weight:normal; color:#ffffff;">
+                                {{ partyName }}
+                            </h1>
+                        </td>
+                    </tr>
+
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding:36px 40px 8px; font-family:Helvetica,Arial,sans-serif; color:#2d2640;">
+                            <p style="margin:0 0 16px; font-size:18px; line-height:1.5;">
+                                Dear {{ familyName }},
+                            </p>
+                            <p style="margin:0 0 16px; font-size:16px; line-height:1.6; color:#4a4360;">
+                                We'd love for you to celebrate with us! Your invitation is for
+                                <strong style="color:#2d2640;">{{ groupSize }} {{ 'guest' if groupSize == 1 else 'guests' }}</strong>.
+                            </p>
+                            <p style="margin:0; font-size:16px; line-height:1.6; color:#4a4360;">
+                                Please register everyone in your group so we can plan food, drinks and
+                                everything else. Whoever registers first becomes the group leader and
+                                creates your group's password.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Signup code -->
+                    <tr>
+                        <td align="center" style="padding:28px 40px 8px;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0"
+                                   style="background-color:#f6f2ff; border:2px dashed #b9a3f2; border-radius:12px;">
+                                <tr>
+                                    <td align="center" style="padding:18px 32px;">
+                                        <p style="margin:0 0 6px; font-family:Helvetica,Arial,sans-serif; font-size:12px;
+                                                  letter-spacing:2px; text-transform:uppercase; color:#6c3ce0;">
+                                            Your signup code
+                                        </p>
+                                        <p style="margin:0; font-family:'Courier New',Courier,monospace; font-size:36px;
+                                                  font-weight:bold; letter-spacing:10px; color:#2d2640;">
+                                            {{ code }}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Button -->
+                    <tr>
+                        <td align="center" style="padding:28px 40px 12px;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center" style="border-radius:999px; background-color:#d6336c;">
+                                        <a href="{{ registerURL }}" target="_blank"
+                                           style="display:inline-block; padding:16px 40px; font-family:Helvetica,Arial,sans-serif;
+                                                  font-size:17px; font-weight:bold; color:#ffffff; text-decoration:none;
+                                                  border-radius:999px;">
+                                            RSVP &amp; register
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center" style="padding:8px 40px 36px; font-family:Helvetica,Arial,sans-serif;">
+                            <p style="margin:0; font-size:13px; line-height:1.6; color:#8a8399;">
+                                Button not working? Copy this link into your browser:<br>
+                                <a href="{{ registerURL }}" style="color:#6c3ce0; word-break:break-all;">{{ registerURL }}</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" style="background-color:#faf8ff; border-top:1px solid #eee8fb; padding:20px 40px;
+                                                  font-family:Helvetica,Arial,sans-serif; font-size:12px; line-height:1.6; color:#8a8399;">
+                            This code is just for your group, so please don't share it.<br>
+                            We can't wait to see you there!
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

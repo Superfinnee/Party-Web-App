@@ -1,0 +1,129 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ group.familyName }} · {{ config.PARTY_NAME }}{% endblock %}
+
+{% block buttons %}{% endblock %}
+
+{% block body %}
+
+<div class="guest-page">
+
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">{{ config.PARTY_NAME }}</p>
+            <h1>Hi, {{ group.familyName }}!</h1>
+        </div>
+        <form method="POST" action="{{ url_for('logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="link-button">Log out</button>
+        </form>
+    </div>
+
+    {# ------------------------------------------------ Party details #}
+    <section class="party-info">
+        <div class="info-item">
+            <span class="info-icon" aria-hidden="true">📍</span>
+            <div>
+                <p class="info-label">Address</p>
+                <a class="info-value" target="_blank" rel="noopener"
+                   href="https://www.google.com/maps/search/?api=1&query={{ config.PARTY_ADDRESS|urlencode }}">
+                    {{ config.PARTY_ADDRESS }}
+                </a>
+            </div>
+        </div>
+        <div class="info-item">
+            <span class="info-icon" aria-hidden="true">🕔</span>
+            <div>
+                <p class="info-label">Time</p>
+                <p class="info-value">{{ config.PARTY_TIME }}</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="notice" role="note">
+        <span aria-hidden="true">⚠️</span>
+        <p><strong>Heads up:</strong> strobe lights and loud music will be used at the party.
+            If anyone in your group is sensitive to flashing lights or noise, please let the host know.</p>
+    </div>
+
+    {# ------------------------------------------------ Updates from the host #}
+    <section class="auth-card" id="updates">
+        <h2 class="section-title">Updates</h2>
+        {% for message in messages %}
+        <article class="message">
+            {% if message.title %}<h3>{{ message.title }}</h3>{% endif %}
+            <p class="message-body">{{ message.body }}</p>
+            <p class="message-time">{{ message.createdAt|friendlyTime }}</p>
+        </article>
+        {% else %}
+        <p class="field-hint">No updates yet. Check back closer to the party!</p>
+        {% endfor %}
+    </section>
+
+    {# ------------------------------------------------ Song requests #}
+    <section class="auth-card" id="songs">
+        <h2 class="section-title">Song requests</h2>
+        <p class="field-hint">Each person can pick up to {{ songsPerPerson }} songs for the playlist.</p>
+
+        {% set attendingGuests = guests|selectattr('attending')|list %}
+        {% if not attendingGuests %}
+        <p class="field-hint">Nobody in your group is marked as attending, so there's no one to request songs for.</p>
+        {% else %}
+
+        {# Songs already sent, with a remove button until the host adds them #}
+        {% for guest in attendingGuests if guest.songs %}
+        {% if loop.first %}<div class="song-lists">{% endif %}
+        <div class="song-person">
+            <h3>{{ guest.fName }}</h3>
+            <ul class="song-list">
+                {% for song in guest.songs %}
+                <li>
+                    <span><strong>{{ song.title }}</strong>{% if song.artist %} · {{ song.artist }}{% endif %}</span>
+                    {% if song.addedAt %}
+                    <span class="status status-registered">On the playlist ✓</span>
+                    {% else %}
+                    <form method="POST" action="{{ url_for('deleteSong', songID=song.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="link-button">Remove</button>
+                    </form>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% if loop.last %}</div>{% endif %}
+        {% endfor %}
+
+        {# Empty slots for anyone who hasn't used all their picks #}
+        {% set openGuests = attendingGuests|selectattr('slotsLeft')|list %}
+
+        {% if openGuests %}
+        <form method="POST" action="{{ url_for('addSongs') }}" class="song-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            {% for guest in openGuests %}
+            <fieldset class="song-fieldset">
+                <legend>{{ guest.fName }} {{ guest.lName }}</legend>
+                {% for slot in range(guest.slotsLeft) %}
+                <div class="song-row">
+                    <input type="text" name="title_{{ guest.id }}" maxlength="150"
+                           placeholder="Song title" aria-label="{{ guest.fName }}'s song title">
+                    <input type="text" name="artist_{{ guest.id }}" maxlength="150"
+                           placeholder="Artist" aria-label="{{ guest.fName }}'s song artist">
+                </div>
+                {% endfor %}
+            </fieldset>
+            {% endfor %}
+
+            <button type="submit" class="auth-submit">Send song requests</button>
+        </form>
+        {% else %}
+        <p class="field-hint">Everyone has picked all {{ songsPerPerson }} songs. See you on the dance floor!</p>
+        {% endif %}
+
+        {% endif %}
+    </section>
+
+</div>
+
+{% endblock %}

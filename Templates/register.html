@@ -1,84 +1,176 @@
-{% entends "layout.html" %}
+{% extends "layout.html" %}
 
 {% block buttons %}{% endblock %}
 
 {% block body %}
 
+{% set form = request.form %}
+
 <div class="auth-page">
-    <form method="POST" action="/register">
-    <h2 class="auth-title">Get ready to party!</h2>
-    
-        <div class="auth-card">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            
-            <div class="auth-field">
-                <label for="fName">First Name</label>
-                <input type="text" id="fName" name="fName" required>
-            </div>
-    
-            <div class="auth-field">
-                <label for="lName">Last Name</label>
-                <input type="text" id="lName" name="lName" required>
-            </div>
 
-            <div class="auth-field">
-                <label>Will you be attending the party?</label>
-                <input type="radio" id="yes" name="attending" value="Yes" checked>
-                <label for="attending">Yes</label>
-                <input type="radio" id="no" name="attending" value="No">
-                <label for="attending">No</label>
-            </div>
+{% if not group %}
+    {# Step 1: no valid code yet, so ask for one #}
+    <form class="auth-card" method="GET" action="{{ url_for('register') }}">
+        <h2 class="auth-title">Get ready to party!</h2>
+        <p class="field-hint">Enter the 6-digit signup code from your invitation email.</p>
 
-            <div class="auth-field">
-                <label>Dietary requirements</label>
-                <p class="field-hint">Tap any that apply. Do not put dislikes here.</p>
-
-                <fieldset class="check-group">
-                    <legend>Major Food Allergies</legend>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Peanuts"><span>Peanuts</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Tree Nuts"><span>Tree Nuts</span></label>
-                    <label class="check-chip important"><input type="checkbox" name="dietaries" value="All Nuts"><span>All Nuts</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Shellfish"><span>Shellfish</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Fish"><span>Fish</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Eggs"><span>Eggs</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Soy"><span>Soy</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Sesame"><span>Sesame</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Sulphites"><span>Sulphites</span></label>
-                </fieldset>
-
-                <fieldset class="check-group">
-                    <legend>Lifestyle</legend>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Vegetarian"><span>Vegetarian</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Vegan"><span>Vegan</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Pescetarian"><span>Pescetarian</span></label>
-                </fieldset>
-
-                <fieldset class="check-group">
-                    <legend>Religious</legend>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Halal"><span>Halal</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Kosher"><span>Kosher</span></label>
-                </fieldset>
-
-                <fieldset class="check-group">
-                    <legend>Medical and Intolerances</legend>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Gluten-Free"><span>Gluten-Free</span></label>
-                    <label class="check-chip important"><input type="checkbox" name="dietaries" value="Coeliac"><span>Coeliac</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Dairy Free"><span>Dairy Free</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Lactose Intolerant"><span>Lactose Intolerant</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Low Sodium"><span>Low Sodium</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Heart Healthy"><span>Heart Healthy</span></label>
-                    <label class="check-chip"><input type="checkbox" name="dietaries" value="Diabetic Friendly"><span>Diabetic Friendly</span></label>
-                </fieldset>
-            </div>
-            
-            <div class="auth-field">
-                <label for="interest">Interest</label>
-                <p>Type one of your interests here. This can be a hobby, holiday, anything you could talk about.</p>
-                <input type="text" id="interest" name="interest">
-            </div>
-
+        <div class="auth-field">
+            <label for="code">Signup code</label>
+            <input type="text" id="code" name="code" inputmode="numeric" pattern="[0-9]{6}"
+                   maxlength="6" autocomplete="one-time-code" required autofocus>
         </div>
 
+        <button type="submit" class="auth-submit">Continue</button>
 
+        <p class="auth-switch">Already registered? <a href="{{ url_for('home') }}">Log in</a>.</p>
+    </form>
 
-        {% for i in range(len(groupSize) - 1) %}
+{% else %}
+    {# Step 2: one card per guest. Field names end in _0, _1, ... so the server can tell them apart. #}
+    <form method="POST" action="{{ url_for('register') }}" class="register-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="code" value="{{ group.code }}">
+
+        <h2 class="auth-title">Get ready to party, {{ group.familyName }}!</h2>
+        <p class="field-hint register-intro">
+            Your invitation is for {{ group.groupSize }} {{ 'person' if group.groupSize == 1 else 'people' }}.
+            {% if group.groupSize > 1 %}Fill in a card for each person.{% endif %}
+            The first person is the group leader and sets the password your group will use to log in.
+        </p>
+
+        {% for i in range(group.groupSize) %}
+        {% set isLeader = loop.first %}
+        {% set attending = form.get('attending_' ~ i, 'yes') %}
+
+        <div class="auth-card guest-card" data-guest="{{ i }}">
+
+            <div class="guest-card-header">
+                <h3>{{ 'You' if isLeader else 'Guest ' ~ (i + 1) }}</h3>
+                {% if isLeader %}<span class="leader-badge">Group leader</span>{% endif %}
+            </div>
+
+            <div class="field-row">
+                <div class="auth-field">
+                    <label for="fName_{{ i }}">First name</label>
+                    <input type="text" id="fName_{{ i }}" name="fName_{{ i }}"
+                           value="{{ form.get('fName_' ~ i, '') }}" maxlength="50" required>
+                </div>
+
+                <div class="auth-field">
+                    <label for="lName_{{ i }}">Last name</label>
+                    <input type="text" id="lName_{{ i }}" name="lName_{{ i }}"
+                           value="{{ form.get('lName_' ~ i, group.familyName if not form else '') }}" maxlength="50" required>
+                </div>
+            </div>
+
+            <fieldset class="auth-field radio-group">
+                <legend>Will {{ 'you' if isLeader else 'they' }} be attending the party?</legend>
+                <label class="check-chip">
+                    <input type="radio" name="attending_{{ i }}" value="yes" class="attending-toggle"
+                           {% if attending == 'yes' %}checked{% endif %}><span>Yes, count me in</span>
+                </label>
+                <label class="check-chip">
+                    <input type="radio" name="attending_{{ i }}" value="no" class="attending-toggle"
+                           {% if attending == 'no' %}checked{% endif %}><span>Sorry, can't make it</span>
+                </label>
+            </fieldset>
+
+            {# Everything in here is hidden when the guest says they're not attending #}
+            <div class="attending-only" {% if attending == 'no' %}hidden{% endif %}>
+
+                <fieldset class="auth-field radio-group">
+                    <legend>Age group</legend>
+                    <p class="field-hint">Helps us plan portions and a kids' menu.</p>
+                    {% for age in ageGroups %}
+                    <label class="check-chip">
+                        <input type="radio" name="ageGroup_{{ i }}" value="{{ age }}" data-required
+                               {% if form.get('ageGroup_' ~ i) == age %}checked{% endif %}
+                               {% if attending == 'yes' %}required{% endif %}><span>{{ age }}</span>
+                    </label>
+                    {% endfor %}
+                </fieldset>
+
+                <div class="auth-field">
+                    <label>Dietary requirements</label>
+                    <p class="field-hint">Tap any that apply. Do not put dislikes here.</p>
+
+                    {% set chosen = form.getlist('dietaries_' ~ i) %}
+                    {% for groupName, options in dietaryGroups.items() %}
+                    <fieldset class="check-group">
+                        <legend>{{ groupName }}</legend>
+                        {% for value, important in options %}
+                        <label class="check-chip{% if important %} important{% endif %}">
+                            <input type="checkbox" name="dietaries_{{ i }}" value="{{ value }}"
+                                   {% if value in chosen %}checked{% endif %}><span>{{ value }}</span>
+                        </label>
+                        {% endfor %}
+                    </fieldset>
+                    {% endfor %}
+                </div>
+
+                <div class="auth-field">
+                    <label for="dietaryNotes_{{ i }}">Anything else the caterers should know?</label>
+                    <p class="field-hint">Other allergies, how severe an allergy is, or whether an EpiPen is carried.</p>
+                    <textarea id="dietaryNotes_{{ i }}" name="dietaryNotes_{{ i }}" rows="2"
+                              maxlength="500">{{ form.get('dietaryNotes_' ~ i, '') }}</textarea>
+                </div>
+
+                <fieldset class="auth-field radio-group">
+                    <legend>Drinks</legend>
+                    {% for drink in drinkOptions %}
+                    <label class="check-chip">
+                        <input type="radio" name="drinks_{{ i }}" value="{{ drink }}"
+                               {% if form.get('drinks_' ~ i) == drink %}checked{% endif %}><span>{{ drink }}</span>
+                    </label>
+                    {% endfor %}
+                </fieldset>
+
+                <div class="auth-field">
+                    <label for="accessibility_{{ i }}">Accessibility needs</label>
+                    <p class="field-hint">Wheelchair access, seating, hearing or anything else that would help. Leave blank if none.</p>
+                    <input type="text" id="accessibility_{{ i }}" name="accessibility_{{ i }}"
+                           value="{{ form.get('accessibility_' ~ i, '') }}" maxlength="500">
+                </div>
+            </div>
+
+            <div class="auth-field">
+                <label for="interest_{{ i }}">Interest</label>
+                <p class="field-hint">Type one of {{ 'your' if isLeader else 'their' }} interests here. This can be a hobby, holiday, anything you could talk about.</p>
+                <input type="text" id="interest_{{ i }}" name="interest_{{ i }}"
+                       value="{{ form.get('interest_' ~ i, '') }}" maxlength="200">
+            </div>
+
+            {% if isLeader %}
+            <div class="leader-section">
+                <h4>Create your group password</h4>
+                <p class="field-hint">
+                    You'll use this with <strong>{{ group.email }}</strong> to log in to your group's page.
+                    At least {{ minPasswordLength }} characters.
+                </p>
+
+                <div class="auth-field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password"
+                           minlength="{{ minPasswordLength }}" autocomplete="new-password" required>
+                </div>
+
+                <div class="auth-field">
+                    <label for="confirmPassword">Confirm password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword"
+                           minlength="{{ minPasswordLength }}" autocomplete="new-password" required>
+                    <label class="show-password">
+                        <input type="checkbox" onclick="togglePassword('password', 'confirmPassword')"> Show passwords
+                    </label>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="auth-submit">Register {{ 'my group' if group.groupSize > 1 else 'me' }}</button>
+    </form>
+{% endif %}
+
+</div>
+
+{% endblock %}

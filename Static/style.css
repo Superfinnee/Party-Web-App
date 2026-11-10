@@ -70,3 +70,572 @@
     background: #d6336c;
     border-color: #d6336c;
 }
+
+/* ------------------------------------------------------------------ Base */
+:root {
+    --purple: #6c3ce0;
+    --pink: #d6336c;
+    --ink: #2d2640;
+    --muted: #666;
+    --border: #ddd;
+    --bg: #f6f3fd;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.5;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+/* ------------------------------------------------------------------ Flash messages */
+.flash-messages {
+    max-width: 640px;
+    margin: 1rem auto 0;
+    padding: 0 1rem;
+}
+
+.flash-messages p {
+    margin: 0 0 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+.flash-messages .error {
+    background: #fdecef;
+    border-color: #f5b5c4;
+    color: #a1173f;
+}
+
+.flash-messages .success {
+    background: #e8f7ee;
+    border-color: #a8dfbd;
+    color: #1d6b3d;
+}
+
+/* ------------------------------------------------------------------ Forms and cards */
+.auth-page {
+    max-width: 640px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.auth-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: 0 2px 16px rgba(108, 60, 224, 0.08);
+    margin-bottom: 1.25rem;
+}
+
+.auth-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.75rem;
+}
+
+.auth-field {
+    margin: 0 0 1.25rem;
+}
+
+fieldset.auth-field {
+    border: none;
+    padding: 0;
+}
+
+.auth-field > label,
+.auth-field > legend {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    padding: 0;
+}
+
+.auth-field input[type="text"],
+.auth-field input[type="email"],
+.auth-field input[type="number"],
+.auth-field input[type="password"],
+.auth-field textarea {
+    width: 100%;
+    padding: 0.65rem 0.8rem;
+    font: inherit;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.auth-field input:focus,
+.auth-field textarea:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(108, 60, 224, 0.15);
+}
+
+.auth-field .field-hint {
+    margin-top: 0;
+}
+
+.radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.radio-group > legend,
+.radio-group > .field-hint {
+    width: 100%;
+}
+
+.show-password {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.auth-submit {
+    display: inline-block;
+    width: 100%;
+    padding: 0.85rem 1.5rem;
+    font: inherit;
+    font-weight: 600;
+    color: #fff;
+    background: var(--purple);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+}
+
+.auth-submit:hover {
+    background: #5a2fc4;
+}
+
+.link-button {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: var(--purple);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* ------------------------------------------------------------------ Register page */
+.register-intro {
+    margin-bottom: 1.5rem;
+}
+
+.field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 1rem;
+}
+
+@media (max-width: 520px) {
+    .field-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.guest-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.guest-card-header h3 {
+    margin: 0;
+}
+
+.leader-badge {
+    padding: 0.2rem 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--purple);
+    background: #efe9fd;
+    border-radius: 999px;
+}
+
+.leader-section {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #eee;
+}
+
+.leader-section h4 {
+    margin: 0 0 0.25rem;
+}
+
+/* ------------------------------------------------------------------ Host page */
+.host-page {
+    max-width: 960px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.host-form {
+    max-width: 480px;
+}
+
+.table-scroll {
+    overflow-x: auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(108, 60, 224, 0.08);
+}
+
+.group-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.group-table th,
+.group-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #f0edf7;
+    white-space: nowrap;
+}
+
+.group-table th {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.group-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.group-table .code {
+    font-family: "Courier New", Courier, monospace;
+    letter-spacing: 2px;
+}
+
+.status {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.85rem;
+    border-radius: 999px;
+}
+
+.status-registered { background: #e8f7ee; color: #1d6b3d; }
+.status-invited    { background: #efe9fd; color: var(--purple); }
+.status-failed     { background: #fdecef; color: #a1173f; }
+
+/* ------------------------------------------------------------------ Shared bits */
+.page-header h1 {
+    margin: 0;
+}
+
+.eyebrow {
+    margin: 0 0 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--purple);
+}
+
+.auth-switch {
+    margin: 1.25rem 0 0;
+    font-size: 0.95rem;
+    text-align: center;
+    color: var(--muted);
+}
+
+.auth-switch a {
+    color: var(--purple);
+}
+
+.section-title {
+    margin: 0 0 0.5rem;
+}
+
+.muted,
+.optional {
+    color: var(--muted);
+    font-weight: normal;
+}
+
+.link-button.danger {
+    color: #a1173f;
+}
+
+.small-button {
+    padding: 0.35rem 0.9rem;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--purple);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.small-button:hover {
+    background: #5a2fc4;
+}
+
+/* Updates posted by the host */
+.message {
+    padding: 1rem 0;
+    border-bottom: 1px solid #f0edf7;
+}
+
+.message:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.message h3,
+.message h4 {
+    margin: 0 0 0.25rem;
+}
+
+.message-body {
+    margin: 0;
+    white-space: pre-line; /* keep the host's line breaks */
+}
+
+.message-time {
+    margin: 0.4rem 0 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.message-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.4rem;
+}
+
+.message-footer .message-time {
+    margin: 0;
+}
+
+/* Song lists, used on both the guest and host pages */
+.song-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.song-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0edf7;
+}
+
+.song-list li:last-child {
+    border-bottom: none;
+}
+
+/* ------------------------------------------------------------------ Guest page */
+.guest-page {
+    max-width: 720px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.guest-page .page-header {
+    margin-bottom: 1.5rem;
+}
+
+.party-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 520px) {
+    .party-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    border-radius: 16px;
+}
+
+.info-icon {
+    font-size: 1.75rem;
+}
+
+.info-label {
+    margin: 0;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+
+.info-value {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+a.info-value {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.notice {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    background: #fff8e1;
+    border: 1px solid #f3d37a;
+    border-radius: 12px;
+    color: #6b4e00;
+}
+
+.notice p {
+    margin: 0;
+}
+
+.song-lists {
+    margin: 1rem 0 1.5rem;
+}
+
+.song-person h3 {
+    margin: 1rem 0 0.25rem;
+    font-size: 1rem;
+}
+
+.song-fieldset {
+    border: none;
+    padding: 0;
+    margin: 0 0 1.25rem;
+}
+
+.song-fieldset legend {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    padding: 0;
+}
+
+.song-row {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.song-row input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    font: inherit;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+}
+
+.song-row input:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(108, 60, 224, 0.15);
+}
+
+@media (max-width: 520px) {
+    .song-row {
+        grid-template-columns: 1fr;
+        margin-bottom: 1rem;
+    }
+}
+
+/* ------------------------------------------------------------------ Host page sections */
+.section-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0 0.5rem;
+}
+
+.section-nav a {
+    padding: 0.35rem 0.9rem;
+    font-size: 0.9rem;
+    color: var(--purple);
+    text-decoration: none;
+    background: #fff;
+    border: 1.5px solid #e2d9fb;
+    border-radius: 999px;
+}
+
+.section-nav a:hover {
+    border-color: var(--purple);
+}
+
+.host-section {
+    margin-top: 2.5rem;
+    scroll-margin-top: 1rem;
+}
+
+.host-section h3 {
+    margin-top: 0;
+}
+
+.host-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+@media (max-width: 760px) {
+    .host-columns {
+        grid-template-columns: 1fr;
+    }
+}
+
+.added-songs {
+    margin-top: 1rem;
+    padding: 0.75rem 1.25rem;
+    background: #fff;
+    border-radius: 12px;
+}
+
+.added-songs summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.added-songs .song-list {
+    margin-top: 0.5rem;
+}

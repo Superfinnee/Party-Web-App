@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width", initial-scale=1>
-    <title>Piccoli Party</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ config.PARTY_NAME }}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 </head>
@@ -33,7 +33,7 @@
     {% block body %}
     {% endblock %}
 
-    <script src="{{ url_for('static', filename="party.js")}}"></script>
+    <script src="{{ url_for('static', filename='party.js') }}"></script>
     <br><br><br>
 
 </body>
