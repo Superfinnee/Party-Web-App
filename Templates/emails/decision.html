@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>{{ partyName }}</title>
+</head>
+{#
+  Email clients ignore <style> blocks and modern CSS, so everything here is
+  table-based with inline styles, matching invite.html. Keep it that way.
+#}
+<body style="margin:0; padding:0; background-color:#f3effc;">
+
+    <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+        {% if approved %}The host said yes to {{ approvedCount }} more! Add their details to your group.
+        {% else %}An update on your request to bring more people.{% endif %}
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f3effc;">
+        <tr>
+            <td align="center" style="padding:32px 16px;">
+
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                       style="max-width:560px; background-color:#ffffff; border-radius:16px; overflow:hidden;
+                              box-shadow:0 4px 24px rgba(108,60,224,0.12);">
+
+                    <!-- Header -->
+                    <tr>
+                        <td align="center"
+                            style="background-color:#6c3ce0; background-image:linear-gradient(135deg,#6c3ce0 0%,#d6336c 100%);
+                                   padding:36px 32px 32px;">
+                            <div style="font-size:36px; line-height:1;">{{ '🎉' if approved else '💌' }}</div>
+                            <h1 style="margin:14px 0 0; font-family:Georgia,'Times New Roman',serif; font-size:28px;
+                                       line-height:1.25; font-weight:normal; color:#ffffff;">
+                                {{ 'Good news!' if approved else 'About your request' }}
+                            </h1>
+                        </td>
+                    </tr>
+
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding:32px 40px 8px; font-family:Helvetica,Arial,sans-serif; color:#2d2640;">
+                            <p style="margin:0 0 16px; font-size:18px; line-height:1.5;">Dear {{ familyName }},</p>
+                            {% if approved %}
+                            <p style="margin:0 0 16px; font-size:16px; line-height:1.6; color:#4a4360;">
+                                The host has said yes to
+                                <strong style="color:#2d2640;">{{ approvedCount }} more {{ 'person' if approvedCount == 1 else 'people' }}</strong>
+                                in your group{% if requested and requested != approvedCount %} (you asked for {{ requested }}){% endif %}.
+                            </p>
+                            <p style="margin:0; font-size:16px; line-height:1.6; color:#4a4360;">
+                                {% if registered %}Please log in and add their details so we can plan food and drinks for them.
+                                {% else %}Your registration form now has room for them.{% endif %}
+                            </p>
+                            {% else %}
+                            <p style="margin:0 0 16px; font-size:16px; line-height:1.6; color:#4a4360;">
+                                Thanks for asking to bring more people. Unfortunately the host can't fit any
+                                extra guests this time.
+                            </p>
+                            <p style="margin:0; font-size:16px; line-height:1.6; color:#4a4360;">
+                                Everyone already in your group is still very welcome. If you'd like to talk
+                                about it, you can message the host from your group's page.
+                            </p>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% if hostReply %}
+                    <!-- Host's note -->
+                    <tr>
+                        <td style="padding:24px 40px 0;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                                   style="background-color:#f6f2ff; border-left:4px solid #6c3ce0; border-radius:8px;">
+                                <tr>
+                                    <td style="padding:14px 18px; font-family:Helvetica,Arial,sans-serif;">
+                                        <p style="margin:0 0 4px; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#6c3ce0;">
+                                            A note from the host
+                                        </p>
+                                        <p style="margin:0; font-size:15px; line-height:1.6; color:#2d2640; white-space:pre-line;">{{ hostReply }}</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    {% endif %}
+
+                    <!-- Button -->
+                    {% set buttonURL = loginURL if (registered or not approved) else registerURL %}
+                    <tr>
+                        <td align="center" style="padding:28px 40px 12px;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center" style="border-radius:999px; background-color:#d6336c;">
+                                        <a href="{{ buttonURL }}" target="_blank"
+                                           style="display:inline-block; padding:16px 40px; font-family:Helvetica,Arial,sans-serif;
+                                                  font-size:17px; font-weight:bold; color:#ffffff; text-decoration:none;
+                                                  border-radius:999px;">
+                                            {% if approved and registered %}Add their details{% elif approved %}Register your group{% else %}Go to your page{% endif %}
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center" style="padding:8px 40px 32px; font-family:Helvetica,Arial,sans-serif;">
+                            <p style="margin:0; font-size:13px; line-height:1.6; color:#8a8399;">
+                                Button not working? Copy this link into your browser:<br>
+                                <a href="{{ buttonURL }}" style="color:#6c3ce0; word-break:break-all;">{{ buttonURL }}</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" style="background-color:#faf8ff; border-top:1px solid #eee8fb; padding:20px 40px;
+                                                  font-family:Helvetica,Arial,sans-serif; font-size:12px; line-height:1.6; color:#8a8399;">
+                            {{ partyName }} · We can't wait to see you there!
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

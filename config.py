@@ -1,9 +1,23 @@
+import logging
 import os
 from dotenv import load_dotenv
 
 # Load .env before the Config class is built, otherwise every os.environ.get
 # below runs before the variables exist and falls back to its default.
 load_dotenv()
+
+
+def intFromEnv(name, default):
+    """Read a whole number from .env, falling back to the default if it's missing or not a number."""
+    raw = os.environ.get(name, '').strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        logging.getLogger(__name__).warning("%s=%r in .env isn't a number, using %s instead",
+                                            name, raw, default)
+        return default
 
 
 class Config:
@@ -21,7 +35,7 @@ class Config:
     PARTY_TIME = os.environ.get('PARTY_TIME', '5PM')
 
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_PORT = intFromEnv('MAIL_PORT', 587)
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() == 'true'
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')

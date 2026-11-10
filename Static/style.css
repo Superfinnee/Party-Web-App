@@ -639,3 +639,225 @@ a.info-value {
 .added-songs .song-list {
     margin-top: 0.5rem;
 }
+
+/* ------------------------------------------------------------------ Requests for more people (register page) */
+.extra-request h3 {
+    margin: 0;
+}
+
+.extra-request-panel {
+    margin-top: 1.25rem;
+}
+
+/* ------------------------------------------------------------------ Host header and bell */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.bell {
+    position: relative;
+    display: inline-flex;
+    padding: 0.4rem;
+    color: var(--ink);
+    border-radius: 999px;
+}
+
+.bell:hover,
+.bell.is-current {
+    color: var(--purple);
+    background: #efe9fd;
+}
+
+/* The red bubble with the number of notifications waiting */
+.bell-count {
+    position: absolute;
+    top: -0.15rem;
+    right: -0.25rem;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.25rem;
+    text-align: center;
+    color: #fff;
+    background: var(--pink);
+    border: 2px solid var(--bg);
+    border-radius: 999px;
+    box-sizing: content-box;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    color: var(--purple);
+    text-decoration: none;
+}
+
+/* ------------------------------------------------------------------ Host notifications page */
+.notification-card h3 {
+    margin: 0.4rem 0 0.1rem;
+}
+
+.notification-header {
+    margin-bottom: 0.75rem;
+}
+
+.kind-badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 999px;
+}
+
+.kind-extraPeople { background: #fdecf3; color: #a1173f; }
+.kind-contact     { background: #efe9fd; color: var(--purple); }
+
+.ask-summary {
+    margin: 0 0 0.5rem;
+}
+
+.message-body.quoted {
+    padding: 0.6rem 0.9rem;
+    margin-bottom: 1rem;
+    background: #faf8ff;
+    border-left: 3px solid #d8cdf7;
+    border-radius: 6px;
+}
+
+.decision-form .auth-field {
+    margin-bottom: 0.75rem;
+}
+
+.decision-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.count-picker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.count-picker input {
+    width: 4.5rem;
+    padding: 0.4rem 0.5rem;
+    font: inherit;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+}
+
+.small-button.secondary {
+    color: #a1173f;
+    background: #fdecef;
+}
+
+.small-button.secondary:hover {
+    background: #f9d6de;
+}
+
+/* ------------------------------------------------------------------ Host guest list */
+.guest-details summary {
+    cursor: pointer;
+    color: var(--purple);
+}
+
+.guest-list {
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.guest-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.3rem 0;
+}
+
+.guest-list li.is-removed > span {
+    color: var(--muted);
+    text-decoration: line-through;
+}
+
+.guest-list li.is-removed .status {
+    text-decoration: none;
+}
+
+/* ------------------------------------------------------------------ Guest page notices */
+.removed-card {
+    border-left: 4px solid #a1173f;
+}
+
+.removed-card p {
+    margin: 0 0 0.5rem;
+}
+
+.notice-removed {
+    background: #f4f1fb;
+    border-color: #d8cdf7;
+    color: var(--ink);
+}
+
+.approved-card {
+    border-left: 4px solid #1d6b3d;
+}
+
+.approved-card p {
+    margin: 0 0 0.5rem;
+}
+
+.approved-section {
+    margin-bottom: 2rem;
+}
+
+.host-reply {
+    margin: 0.5rem 0 0;
+    padding: 0.6rem 0.9rem;
+    background: #f6f2ff;
+    border-radius: 8px;
+    white-space: pre-line;
+}
+
+.short-number {
+    max-width: 8rem;
+}
+
+/* Messages the group has sent to the host */
+.sent-title {
+    margin: 1.75rem 0 0.5rem;
+    font-size: 1.05rem;
+}
+
+.sent-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sent-list li {
+    padding: 0.85rem 0;
+    border-top: 1px solid #f0edf7;
+}
+
+.sent-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+}
+
+.sent-ask {
+    margin: 0 0 0.25rem;
+    font-weight: 600;
+}

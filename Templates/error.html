@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{# Friendly page shown when something goes wrong. Kept simple on purpose:
+   it only uses config, never the database, so it still works when that's down. #}
+
+{% block title %}{{ title }} · {{ config.PARTY_NAME }}{% endblock %}
+
+{% block buttons %}{% endblock %}
+
+{% block body %}
+
+<div class="auth-page">
+    <div class="auth-card">
+        <p class="eyebrow">{{ config.PARTY_NAME }}</p>
+        <h2 class="auth-title">{{ title }}</h2>
+        <p class="field-hint">{{ message }}</p>
+        <a href="{{ backURL }}" class="auth-submit">Back to the party</a>
+    </div>
+</div>
+
+{% endblock %}

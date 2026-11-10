@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% from "_guestCard.html" import guestCard with context %}
 
 {% block buttons %}{% endblock %}
 
@@ -39,133 +40,66 @@
         </p>
 
         {% for i in range(group.groupSize) %}
-        {% set isLeader = loop.first %}
-        {% set attending = form.get('attending_' ~ i, 'yes') %}
+        {% if loop.first %}
+        {% call guestCard(i, 'You', isLeader=True, defaultLastName=group.familyName) %}
+        <div class="leader-section">
+            <h4>Create your group password</h4>
+            <p class="field-hint">
+                You'll use this with <strong>{{ group.email }}</strong> to log in to your group's page.
+                At least {{ minPasswordLength }} characters.
+            </p>
 
-        <div class="auth-card guest-card" data-guest="{{ i }}">
-
-            <div class="guest-card-header">
-                <h3>{{ 'You' if isLeader else 'Guest ' ~ (i + 1) }}</h3>
-                {% if isLeader %}<span class="leader-badge">Group leader</span>{% endif %}
-            </div>
-
-            <div class="field-row">
-                <div class="auth-field">
-                    <label for="fName_{{ i }}">First name</label>
-                    <input type="text" id="fName_{{ i }}" name="fName_{{ i }}"
-                           value="{{ form.get('fName_' ~ i, '') }}" maxlength="50" required>
-                </div>
-
-                <div class="auth-field">
-                    <label for="lName_{{ i }}">Last name</label>
-                    <input type="text" id="lName_{{ i }}" name="lName_{{ i }}"
-                           value="{{ form.get('lName_' ~ i, group.familyName if not form else '') }}" maxlength="50" required>
-                </div>
-            </div>
-
-            <fieldset class="auth-field radio-group">
-                <legend>Will {{ 'you' if isLeader else 'they' }} be attending the party?</legend>
-                <label class="check-chip">
-                    <input type="radio" name="attending_{{ i }}" value="yes" class="attending-toggle"
-                           {% if attending == 'yes' %}checked{% endif %}><span>Yes, count me in</span>
-                </label>
-                <label class="check-chip">
-                    <input type="radio" name="attending_{{ i }}" value="no" class="attending-toggle"
-                           {% if attending == 'no' %}checked{% endif %}><span>Sorry, can't make it</span>
-                </label>
-            </fieldset>
-
-            {# Everything in here is hidden when the guest says they're not attending #}
-            <div class="attending-only" {% if attending == 'no' %}hidden{% endif %}>
-
-                <fieldset class="auth-field radio-group">
-                    <legend>Age group</legend>
-                    <p class="field-hint">Helps us plan portions and a kids' menu.</p>
-                    {% for age in ageGroups %}
-                    <label class="check-chip">
-                        <input type="radio" name="ageGroup_{{ i }}" value="{{ age }}" data-required
-                               {% if form.get('ageGroup_' ~ i) == age %}checked{% endif %}
-                               {% if attending == 'yes' %}required{% endif %}><span>{{ age }}</span>
-                    </label>
-                    {% endfor %}
-                </fieldset>
-
-                <div class="auth-field">
-                    <label>Dietary requirements</label>
-                    <p class="field-hint">Tap any that apply. Do not put dislikes here.</p>
-
-                    {% set chosen = form.getlist('dietaries_' ~ i) %}
-                    {% for groupName, options in dietaryGroups.items() %}
-                    <fieldset class="check-group">
-                        <legend>{{ groupName }}</legend>
-                        {% for value, important in options %}
-                        <label class="check-chip{% if important %} important{% endif %}">
-                            <input type="checkbox" name="dietaries_{{ i }}" value="{{ value }}"
-                                   {% if value in chosen %}checked{% endif %}><span>{{ value }}</span>
-                        </label>
-                        {% endfor %}
-                    </fieldset>
-                    {% endfor %}
-                </div>
-
-                <div class="auth-field">
-                    <label for="dietaryNotes_{{ i }}">Anything else the caterers should know?</label>
-                    <p class="field-hint">Other allergies, how severe an allergy is, or whether an EpiPen is carried.</p>
-                    <textarea id="dietaryNotes_{{ i }}" name="dietaryNotes_{{ i }}" rows="2"
-                              maxlength="500">{{ form.get('dietaryNotes_' ~ i, '') }}</textarea>
-                </div>
-
-                <fieldset class="auth-field radio-group">
-                    <legend>Drinks</legend>
-                    {% for drink in drinkOptions %}
-                    <label class="check-chip">
-                        <input type="radio" name="drinks_{{ i }}" value="{{ drink }}"
-                               {% if form.get('drinks_' ~ i) == drink %}checked{% endif %}><span>{{ drink }}</span>
-                    </label>
-                    {% endfor %}
-                </fieldset>
-
-                <div class="auth-field">
-                    <label for="accessibility_{{ i }}">Accessibility needs</label>
-                    <p class="field-hint">Wheelchair access, seating, hearing or anything else that would help. Leave blank if none.</p>
-                    <input type="text" id="accessibility_{{ i }}" name="accessibility_{{ i }}"
-                           value="{{ form.get('accessibility_' ~ i, '') }}" maxlength="500">
-                </div>
+            <div class="auth-field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password"
+                       minlength="{{ minPasswordLength }}" autocomplete="new-password" required>
             </div>
 
             <div class="auth-field">
-                <label for="interest_{{ i }}">Interest</label>
-                <p class="field-hint">Type one of {{ 'your' if isLeader else 'their' }} interests here. This can be a hobby, holiday, anything you could talk about.</p>
-                <input type="text" id="interest_{{ i }}" name="interest_{{ i }}"
-                       value="{{ form.get('interest_' ~ i, '') }}" maxlength="200">
+                <label for="confirmPassword">Confirm password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword"
+                       minlength="{{ minPasswordLength }}" autocomplete="new-password" required>
+                <label class="show-password">
+                    <input type="checkbox" onclick="togglePassword('password', 'confirmPassword')"> Show passwords
+                </label>
             </div>
-
-            {% if isLeader %}
-            <div class="leader-section">
-                <h4>Create your group password</h4>
-                <p class="field-hint">
-                    You'll use this with <strong>{{ group.email }}</strong> to log in to your group's page.
-                    At least {{ minPasswordLength }} characters.
-                </p>
-
-                <div class="auth-field">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password"
-                           minlength="{{ minPasswordLength }}" autocomplete="new-password" required>
-                </div>
-
-                <div class="auth-field">
-                    <label for="confirmPassword">Confirm password</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword"
-                           minlength="{{ minPasswordLength }}" autocomplete="new-password" required>
-                    <label class="show-password">
-                        <input type="checkbox" onclick="togglePassword('password', 'confirmPassword')"> Show passwords
-                    </label>
-                </div>
-            </div>
-            {% endif %}
         </div>
+        {% endcall %}
+        {% else %}
+        {{ guestCard(i, 'Guest ' ~ (i + 1), defaultLastName=group.familyName) }}
+        {% endif %}
         {% endfor %}
+
+        {# Optional request to bring more people. The fields are disabled while
+           the panel is closed so nothing is sent unless the group opens it. #}
+        {% set requestOpen = form.get('extraRequested') or form.get('extraRequestNote') %}
+        <div class="auth-card extra-request">
+            <h3>Need to bring more people?</h3>
+            <p class="field-hint">
+                If you'd like to bring a plus one, or your group is bigger than {{ group.groupSize }},
+                ask the host here. Register the people above for now. If the host says yes, you'll
+                be able to add the extra people's details from your group's page.
+            </p>
+            <button type="button" class="link-button extra-request-toggle"
+                    aria-expanded="{{ 'true' if requestOpen else 'false' }}" aria-controls="extraRequestPanel">
+                {{ 'Never mind, remove my request' if requestOpen else 'Ask the host for more spots' }}
+            </button>
+
+            <div id="extraRequestPanel" class="extra-request-panel" {% if not requestOpen %}hidden{% endif %}>
+                <div class="auth-field">
+                    <label for="extraRequested">How many extra people?</label>
+                    <input type="number" id="extraRequested" name="extraRequested" min="1" max="{{ maxGroupSize }}"
+                           value="{{ form.get('extraRequested', '') }}" {% if not requestOpen %}disabled{% endif %}>
+                </div>
+
+                <div class="auth-field">
+                    <label for="extraRequestNote">Message to the host</label>
+                    <p class="field-hint">Who they are and how they're connected, for example "my partner Sam" or "our two kids weren't on the invite".</p>
+                    <textarea id="extraRequestNote" name="extraRequestNote" rows="3" maxlength="1000"
+                              {% if not requestOpen %}disabled{% endif %}>{{ form.get('extraRequestNote', '') }}</textarea>
+                </div>
+            </div>
+        </div>
 
         <button type="submit" class="auth-submit">Register {{ 'my group' if group.groupSize > 1 else 'me' }}</button>
     </form>

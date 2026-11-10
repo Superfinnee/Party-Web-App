@@ -1,0 +1,25 @@
+{% if approved %}Good news from the {{ partyName }}!
+
+Dear {{ familyName }},
+
+The host has said yes to {{ approvedCount }} more {{ 'person' if approvedCount == 1 else 'people' }} in your group{% if requested and requested != approvedCount %} (you asked for {{ requested }}){% endif %}.
+{% if hostReply %}
+A note from the host:
+{{ hostReply }}
+{% endif %}
+{% if registered %}Please log in and add their details so we can plan food and drinks for them:
+{{ loginURL }}{% else %}Your registration form now has room for them. Register your group here:
+{{ registerURL }}{% endif %}
+{% else %}About your {{ partyName }} invitation
+
+Dear {{ familyName }},
+
+Thanks for asking to bring more people. Unfortunately the host can't fit any extra guests this time.
+{% if hostReply %}
+A note from the host:
+{{ hostReply }}
+{% endif %}
+Everyone already in your group is still very welcome. If you'd like to talk about it, you can message the host from your group's page:
+{{ loginURL }}
+{% endif %}
+We can't wait to see you there!

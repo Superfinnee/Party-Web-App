@@ -27,3 +27,23 @@ document.querySelectorAll('.guest-card').forEach(card => {
     });
     update();
 });
+
+
+// Register page: the "Need to bring more people?" panel. Its fields are
+// disabled while it's closed so an abandoned request isn't sent.
+document.querySelectorAll('.extra-request').forEach(card => {
+    const toggle = card.querySelector('.extra-request-toggle');
+    const panel = card.querySelector('.extra-request-panel');
+    if (!toggle || !panel) return;
+
+    toggle.addEventListener('click', () => {
+        const opening = panel.hidden;
+        panel.hidden = !opening;
+        panel.querySelectorAll('input, textarea').forEach(field => {
+            field.disabled = !opening;
+        });
+        toggle.setAttribute('aria-expanded', String(opening));
+        toggle.textContent = opening ? 'Never mind, remove my request' : 'Ask the host for more spots';
+        if (opening) panel.querySelector('input, textarea')?.focus();
+    });
+});

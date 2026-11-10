@@ -8,10 +8,13 @@
 
     <div class="page-header">
         <h1>Manage Guests</h1>
-        <form method="POST" action="{{ url_for('logout') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="link-button">Log out</button>
-        </form>
+        <div class="header-actions">
+            {% include "_bell.html" %}
+            <form method="POST" action="{{ url_for('logout') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="link-button">Log out</button>
+            </form>
+        </div>
     </div>
 
     <nav class="section-nav">
@@ -157,6 +160,7 @@
                         <th>Group</th>
                         <th>Email</th>
                         <th>Size</th>
+                        <th>Guests</th>
                         <th>Code</th>
                         <th>Status</th>
                         <th></th>
@@ -167,10 +171,49 @@
                     <tr>
                         <td>{{ group.familyName }}</td>
                         <td>{{ group.email }}</td>
-                        <td>{{ group.groupSize }}</td>
+                        <td>{{ group.groupSize }}
+                            {% if openAsks.get(group.id) %}<a href="{{ url_for('notifications') }}" class="muted">(+{{ openAsks[group.id] }} asked)</a>{% endif %}
+                            {% if group.extraSlots %}<span class="muted" title="Approved, waiting for the group to add details">({{ group.extraSlots }} to fill in)</span>{% endif %}</td>
+                        <td>
+                            {% set people = guestsByGroup.get(group.id, []) %}
+                            {% set removedCount = people|selectattr('removedAt')|list|length %}
+                            {% if people %}
+                            <details class="guest-details">
+                                <summary>{{ people|length - removedCount }} on the list{% if removedCount %}, {{ removedCount }} removed{% endif %}</summary>
+                                <ul class="guest-list">
+                                    {% for person in people %}
+                                    <li{% if person.removedAt %} class="is-removed"{% endif %}>
+                                        <span>
+                                            {{ person.fName }} {{ person.lName }}
+                                            {% if person.isLeader %}<span class="muted">· leader</span>{% endif %}
+                                            {% if person.removedAt %}<span class="status status-failed">Removed</span>
+                                            {% elif not person.attending %}<span class="muted">· not coming</span>{% endif %}
+                                        </span>
+                                        {% if person.removedAt %}
+                                        <form method="POST" action="{{ url_for('restoreGuest', guestID=person.id) }}">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="link-button">Restore</button>
+                                        </form>
+                                        {% else %}
+                                        <form method="POST" action="{{ url_for('removeGuest', guestID=person.id) }}"
+                                              onsubmit='return confirm({{ ("Remove " ~ person.fName ~ " " ~ person.lName ~ " from the guest list? Their group will see this when they log in.")|tojson }})'>
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="link-button danger">Remove</button>
+                                        </form>
+                                        {% endif %}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </details>
+                            {% else %}
+                            <span class="muted">Not registered yet</span>
+                            {% endif %}
+                        </td>
                         <td class="code">{{ group.code }}</td>
                         <td>
-                            {% if group.registeredAt %}
+                            {% if people and removedCount == people|length %}
+                            <span class="status status-failed">Removed</span>
+                            {% elif group.registeredAt %}
                             <span class="status status-registered">Registered · {{ group.attendingCount }} attending</span>
                             {% elif group.invitedAt %}
                             <span class="status status-invited">Invited</span>

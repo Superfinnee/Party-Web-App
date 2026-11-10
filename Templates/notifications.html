@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+
+{% block title %}Notifications · {{ config.PARTY_NAME }}{% endblock %}
+
+{% block body %}
+
+<div class="host-page">
+
+    <div class="page-header">
+        <div>
+            <a href="{{ url_for('host') }}" class="back-link">← Manage Guests</a>
+            <h1>Notifications</h1>
+        </div>
+        <div class="header-actions">
+            {% include "_bell.html" %}
+            <form method="POST" action="{{ url_for('logout') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="link-button">Log out</button>
+            </form>
+        </div>
+    </div>
+
+    {# ------------------------------------------------ Waiting for the host #}
+    <section class="host-section">
+        <h2>Needs a reply ({{ openNotes|length }})</h2>
+        <p class="field-hint">Requests to bring more people, and messages from groups. Your answer and any
+            note you add show on the group's page, and decisions on requests are emailed to them too.</p>
+
+        {% for note in openNotes %}
+        <article class="auth-card notification-card">
+            <div class="notification-header">
+                <div>
+                    <span class="kind-badge kind-{{ note.kind }}">
+                        {{ 'Wants to bring more people' if note.kind == 'extraPeople' else 'Message' }}
+                    </span>
+                    <h3>{{ note.familyName }}</h3>
+                    <p class="message-time">
+                        {{ note.createdAt|friendlyTime }} ·
+                        <a href="mailto:{{ note.email }}">{{ note.email }}</a>
+                        {% if note.guestCount and not note.activeCount %}
+                        · <span class="status status-failed">Removed from guest list</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            {% if note.kind == 'extraPeople' %}
+            <p class="ask-summary">
+                Invited {{ note.groupSize }}.
+                {% if note.extraRequested %}Asking for <strong>{{ note.extraRequested }} more</strong>.
+                {% else %}Didn't say how many.{% endif %}
+            </p>
+            {% endif %}
+            {% if note.body %}<p class="message-body quoted">{{ note.body }}</p>{% endif %}
+
+            <form method="POST" action="{{ url_for('decideNotification', notificationID=note.id) }}" class="decision-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="auth-field">
+                    <label for="reply_{{ note.id }}">Note back to the group <span class="optional">(optional)</span></label>
+                    <textarea id="reply_{{ note.id }}" name="reply" rows="2" maxlength="1000"
+                              placeholder="{{ "e.g. Of course! Can't wait to meet them." if note.kind == 'extraPeople' else 'e.g. All sorted, see you there!' }}"></textarea>
+                </div>
+
+                {% if note.kind == 'extraPeople' %}
+                <div class="decision-row">
+                    <label class="count-picker">
+                        Say yes to
+                        <input type="number" name="count" min="1" max="{{ maxGroupSize }}"
+                               value="{{ note.extraRequested or '' }}" aria-label="How many extra people to add">
+                        more
+                    </label>
+                    <button type="submit" name="decision" value="approve" class="small-button">Approve</button>
+                    <button type="submit" name="decision" value="decline" class="small-button secondary"
+                            formnovalidate>Decline</button>
+                </div>
+                {% else %}
+                <div class="decision-row">
+                    <button type="submit" name="decision" value="resolve" class="small-button">Mark as done</button>
+                </div>
+                {% endif %}
+            </form>
+        </article>
+        {% else %}
+        <p class="field-hint">You're all caught up. Nothing is waiting for a reply.</p>
+        {% endfor %}
+    </section>
+
+    {# ------------------------------------------------ Already dealt with #}
+    {% if doneNotes %}
+    <section class="host-section">
+        <details class="added-songs">
+            <summary>Done ({{ doneNotes|length }})</summary>
+            <ul class="song-list">
+                {% for note in doneNotes %}
+                <li>
+                    <span>
+                        <strong>{{ note.familyName }}</strong>
+                        {% if note.status == 'approved' %}
+                        <span class="status status-registered">Said yes to {{ note.extraApproved }}</span>
+                        {% elif note.status == 'declined' %}
+                        <span class="status status-failed">Declined</span>
+                        {% else %}
+                        <span class="status status-invited">Done</span>
+                        {% endif %}
+                        {% if note.body %}<span class="muted">“{{ note.body|truncate(80) }}”</span>{% endif %}
+                        {% if note.hostReply %}<br><span class="muted">You replied: {{ note.hostReply|truncate(80) }}</span>{% endif %}
+                    </span>
+                    {% if note.status in ('declined', 'resolved') %}
+                    <form method="POST" action="{{ url_for('reopenNotification', notificationID=note.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="link-button">Undo</button>
+                    </form>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
+    </section>
+    {% endif %}
+
+</div>
+
+{% endblock %}

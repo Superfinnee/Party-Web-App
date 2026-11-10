@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% from "_guestCard.html" import guestCard with context %}
 
 {% block title %}{{ group.familyName }} · {{ config.PARTY_NAME }}{% endblock %}
 
@@ -11,13 +12,58 @@
     <div class="page-header">
         <div>
             <p class="eyebrow">{{ config.PARTY_NAME }}</p>
-            <h1>Hi, {{ group.familyName }}!</h1>
+            <h1>Hi, {{ group.familyName|pluralName }}!</h1>
         </div>
         <form method="POST" action="{{ url_for('logout') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="link-button">Log out</button>
         </form>
     </div>
+
+    {% if removedEntirely %}
+    {# ------------------------------------------------ Whole group removed #}
+    <section class="auth-card removed-card" role="alert">
+        <h2 class="section-title">You've been removed from the guest list</h2>
+        <p>The host has taken {{ 'everyone in your group' if removedGuests|length > 1 else 'you' }} off the guest list
+            for the {{ config.PARTY_NAME }}.</p>
+        <p class="field-hint">If you think this is a mistake, or there's something you'd like to sort out,
+            <a href="#contact">send the host a message</a> below.</p>
+    </section>
+
+    {% else %}
+
+    {% if removedGuests %}
+    {# ------------------------------------------------ Some people removed #}
+    {% set names = removedGuests|map(attribute='fName')|list %}
+    <div class="notice notice-removed" role="note">
+        <span aria-hidden="true">ℹ️</span>
+        <p><strong>{{ names[:-1]|join(', ') ~ ' and ' ~ names[-1] if names|length > 1 else names[0] }}
+            {{ 'has' if names|length == 1 else 'have' }} been removed from the guest list</strong> by the host.
+            If you have any questions, <a href="#contact">send the host a message</a>.</p>
+    </div>
+    {% endif %}
+
+    {% if group.extraSlots %}
+    {# ------------------------------------------------ Host said yes to more people #}
+    <section class="approved-section" id="extra-guests">
+        <div class="auth-card approved-card">
+            <h2 class="section-title">Good news! 🎉</h2>
+            <p>The host said yes to <strong>{{ group.extraSlots }} more {{ 'person' if group.extraSlots == 1 else 'people' }}</strong>.
+                Add their details below so we can plan food and drinks for them.</p>
+            {% if latestApproval and latestApproval.hostReply %}
+            <p class="host-reply"><span class="muted">From the host:</span> {{ latestApproval.hostReply }}</p>
+            {% endif %}
+        </div>
+
+        <form method="POST" action="{{ url_for('addExtraGuests') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% for i in range(group.extraSlots) %}
+            {{ guestCard(i, 'Extra guest ' ~ (i + 1) if group.extraSlots > 1 else 'Extra guest', defaultLastName=group.familyName) }}
+            {% endfor %}
+            <button type="submit" class="auth-submit">Add {{ 'them' if group.extraSlots > 1 else 'this person' }} to our group</button>
+        </form>
+    </section>
+    {% endif %}
 
     {# ------------------------------------------------ Party details #}
     <section class="party-info">
@@ -121,6 +167,64 @@
         <p class="field-hint">Everyone has picked all {{ songsPerPerson }} songs. See you on the dance floor!</p>
         {% endif %}
 
+        {% endif %}
+    </section>
+
+    {% endif %}
+
+    {# ------------------------------------------------ Contact the host #}
+    {% set form = request.form %}
+    <section class="auth-card" id="contact">
+        <h2 class="section-title">Contact the host</h2>
+        <p class="field-hint">Questions, changes to your group, or anything you'd like to sort out.
+            The host's reply will show here.</p>
+
+        <form method="POST" action="{{ url_for('contactHost') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="auth-field">
+                <label for="contactMessage">Message</label>
+                <textarea id="contactMessage" name="message" rows="3" maxlength="1000" required>{{ form.get('message', '') }}</textarea>
+            </div>
+
+            {% if not removedEntirely %}
+            <div class="auth-field">
+                <label for="contactExtra">Asking to bring more people? <span class="optional">(optional)</span></label>
+                <p class="field-hint">Say how many, and the host can approve them. You'll then add their details here.</p>
+                <input type="number" id="contactExtra" name="extraRequested" min="1" max="{{ maxGroupSize }}"
+                       value="{{ form.get('extraRequested', '') }}" class="short-number">
+            </div>
+            {% endif %}
+
+            <button type="submit" class="auth-submit">Send to the host</button>
+        </form>
+
+        {% if notifications %}
+        <h3 class="sent-title">Sent to the host</h3>
+        <ul class="sent-list">
+            {% for note in notifications %}
+            <li>
+                <div class="sent-header">
+                    <span class="message-time">{{ note.createdAt|friendlyTime }}</span>
+                    {% if note.status == 'open' %}
+                    <span class="status status-invited">Waiting for the host</span>
+                    {% elif note.status == 'approved' %}
+                    <span class="status status-registered">Host said yes to {{ note.extraApproved }} more</span>
+                    {% elif note.status == 'declined' %}
+                    <span class="status status-failed">Host said no this time</span>
+                    {% else %}
+                    <span class="status status-registered">Seen by the host</span>
+                    {% endif %}
+                </div>
+                {% if note.kind == 'extraPeople' and note.extraRequested %}
+                <p class="sent-ask">Asked to bring {{ note.extraRequested }} more</p>
+                {% endif %}
+                {% if note.body %}<p class="message-body">{{ note.body }}</p>{% endif %}
+                {% if note.hostReply %}
+                <p class="host-reply"><span class="muted">Host replied:</span> {{ note.hostReply }}</p>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
         {% endif %}
     </section>
 
