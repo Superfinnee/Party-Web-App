@@ -1,7 +1,7 @@
-import hmac, re, sqlite3
+import hashlib, hmac, os, re, sqlite3, subprocess, threading, urllib.error, urllib.request
 from datetime import datetime, timedelta
 from functools import wraps
-from flask import Flask, render_template, request, redirect, session, url_for, flash, current_app
+from flask import Flask, render_template, request, redirect, session, url_for, flash, current_app, abort
 from werkzeug.exceptions import HTTPException
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_limiter import Limiter
@@ -214,6 +214,81 @@ def otherHTTPError(error):
     """Any other HTTP error (e.g. 400 Bad Request) gets the same friendly page."""
     return showError(error.name, "That request couldn't be completed. Please go back and try again.",
                      error.code or 500)
+
+
+# ---------------------------------------------------------------- Auto deploy
+#
+# When code is pushed to GitHub, GitHub sends a webhook here. The server then
+# pulls the new code and asks PythonAnywhere to reload the site, so there's no
+# need to log in and pull by hand. Settings come from .env (see config.py).
+
+# The folder this file is in, which is the git repository on the server
+REPO_PATH = os.path.dirname(os.path.abspath(__file__))
+
+
+def deploy(branch, reloadURL, apiToken):
+    """Pull the latest code, then reload the web app. Runs on its own thread
+    because the reload restarts the worker that's running this code."""
+    try:
+        for command in (['git', '-C', REPO_PATH, 'fetch', 'origin', branch],
+                        ['git', '-C', REPO_PATH, 'reset', '--hard', f'origin/{branch}']):
+            result = subprocess.run(command, capture_output=True, text=True, timeout=120)
+            if result.returncode != 0:
+                app.logger.error("Deploy stopped, '%s' failed: %s", ' '.join(command[3:]), result.stderr.strip())
+                return
+        app.logger.info("Deploy pulled the latest %s", branch)
+
+        if not apiToken:
+            app.logger.warning("Code updated but PA_API_TOKEN isn't set, so reload the web app by hand")
+            return
+        reloadRequest = urllib.request.Request(reloadURL, method='POST',
+                                               headers={'Authorization': f'Token {apiToken}'})
+        with urllib.request.urlopen(reloadRequest, timeout=30):
+            pass
+    except urllib.error.HTTPError as error:
+        app.logger.error("PythonAnywhere wouldn't reload the web app (HTTP %s). "
+                         "Check PA_USERNAME, PA_DOMAIN and PA_API_TOKEN in .env", error.code)
+    except Exception:
+        app.logger.exception("Deploy failed")
+
+
+@app.route("/git_pull", methods=["POST"])
+@csrf.exempt  # GitHub can't send a CSRF token; the signature check below does that job instead
+def gitPull():
+    secret = current_app.config['WEBHOOK_SECRET']
+    if not secret:
+        # Not set up on this machine (e.g. running locally), so act like the page isn't here
+        abort(404)
+
+    # GitHub signs each webhook with the shared secret. Only someone who knows
+    # the secret can make a matching signature, so this proves it came from GitHub.
+    signature = request.headers.get('X-Hub-Signature-256', '')
+    expected = 'sha256=' + hmac.new(secret.encode(), request.get_data(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(signature.encode(), expected.encode()):
+        current_app.logger.warning("Rejected a deploy webhook with a bad signature")
+        abort(403)
+
+    event = request.headers.get('X-GitHub-Event', '')
+    if event == 'ping':
+        # GitHub sends this once when the webhook is first added
+        return "pong", 200
+    if event != 'push':
+        return f"Ignored {event} event", 200
+
+    # Only deploy pushes to the live branch, not every branch
+    branch = current_app.config['DEPLOY_BRANCH']
+    payload = request.get_json(silent=True) or {}
+    if payload.get('ref') != f'refs/heads/{branch}':
+        return f"Ignored, not a push to {branch}", 200
+
+    apiHost = current_app.config['PA_API_HOST']
+    username = current_app.config['PA_USERNAME']
+    domain = current_app.config['PA_DOMAIN']
+    reloadURL = f"https://{apiHost}/api/v0/user/{username}/webapps/{domain}/reload/"
+
+    # The reply has to go back to GitHub before the reload restarts this worker
+    threading.Thread(target=deploy, args=(branch, reloadURL, current_app.config['PA_API_TOKEN'])).start()
+    return "Deploying", 202
 
 
 # ---------------------------------------------------------------- Login

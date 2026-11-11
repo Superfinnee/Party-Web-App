@@ -40,3 +40,14 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
+
+    # Auto deploy from GitHub (the /git_pull route). Only needed on PythonAnywhere;
+    # leave WEBHOOK_SECRET out of your local .env and the route stays switched off.
+    WEBHOOK_SECRET = os.environ.get('WEBHOOK_SECRET', '')
+    DEPLOY_BRANCH = os.environ.get('DEPLOY_BRANCH', 'Development')
+    PA_USERNAME = os.environ.get('PA_USERNAME', '')
+    PA_API_TOKEN = os.environ.get('PA_API_TOKEN', '')
+    # The web app's address, e.g. yourname.pythonanywhere.com
+    PA_DOMAIN = os.environ.get('PA_DOMAIN') or f"{PA_USERNAME}.pythonanywhere.com"
+    # Use eu.pythonanywhere.com if your account is on the EU servers
+    PA_API_HOST = os.environ.get('PA_API_HOST', 'www.pythonanywhere.com')
